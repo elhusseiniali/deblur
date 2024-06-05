@@ -8,18 +8,15 @@ from torchvision.transforms import ToTensor
 
 
 class BlurAndSharp(Dataset):
-    def __init__(self, path, img_size, image_limit=None, augment=False):
+    def __init__(self, data_path, config, image_limit=None, augment=False):
         """BlurandSharp constructor.
 
         Parameters
         ----------
-        path : [pathlib.Path]
+        data_path : [pathlib.Path]
             Path to images to be used to construct the dataset.
-        img_size : [int]
-            Size of the image, assumed to be one of W or H, since images
-            will be cropped to squares.
-            e.g. if your image is (299, 299), you just set this to be 299.
-            It will be converted to a tuple inside the constructor.
+        config: [Config]
+            Config to use.
         image_limit : [int or None], optional
             How many images the dataset should containt, by default None
         augment : [bool], optional
@@ -32,10 +29,15 @@ class BlurAndSharp(Dataset):
         ValueError
             If the number of blurry and sharp images isn't the same
         """
-        self.root_dir = Path(path)
+        self.data_path = Path(data_path)
+        self.config = config
+        img_size = self.config.img_size
         self.img_size = (img_size, img_size)
 
         if augment:
+            mean = self.config.mean
+            std = self.config.std
+
             self.transform = transforms.Compose(
                 [
                     transforms.Resize(self.img_size),
@@ -47,8 +49,8 @@ class BlurAndSharp(Dataset):
                         saturation=0.2,
                         hue=0.2),
                     transforms.Normalize(
-                        mean=[0.485, 0.456, 0.406],
-                        std=[0.229, 0.224, 0.225]
+                        mean=mean,
+                        std=std
                     ),
             ])
         else:
@@ -60,16 +62,16 @@ class BlurAndSharp(Dataset):
                 raise TypeError('image_limit should be an int.')
 
         self.blur_directory = (
-            list(self.root_dir.joinpath('blur').glob('*.png')) +
-            list(self.root_dir.joinpath('blur').glob('*.jpg')) +
-            list(self.root_dir.joinpath('blur').glob('*.jpeg'))
+            list(self.data_path.joinpath('blur').glob('*.png')) +
+            list(self.data_path.joinpath('blur').glob('*.jpg')) +
+            list(self.data_path.joinpath('blur').glob('*.jpeg'))
         )
         self.blur_directory = self.blur_directory[:image_limit]
 
         self.sharp_directory = (
-            list(self.root_dir.joinpath('sharp').glob('*.png')) +
-            list(self.root_dir.joinpath('sharp').glob('*.jpg')) +
-            list(self.root_dir.joinpath('sharp').glob('*.jpeg'))
+            list(self.data_path.joinpath('sharp').glob('*.png')) +
+            list(self.data_path.joinpath('sharp').glob('*.jpg')) +
+            list(self.data_path.joinpath('sharp').glob('*.jpeg'))
         )
         self.sharp_directory = self.sharp_directory[:image_limit]
         if len(self.blur_directory) != len(self.sharp_directory):
@@ -103,10 +105,10 @@ class BlurAndSharp(Dataset):
         return (combined_images[0], combined_images[1])
 
 
-def get_loader(path, img_size, batch_size, image_limit=False, augment=True):
+def get_loader(data_path, config, batch_size, image_limit=False, augment=True):
     dataset = BlurAndSharp(
-        path=path,
-        img_size=img_size,
+        data_path=data_path,
+        config=config,
         image_limit=image_limit,
         augment=True
     )

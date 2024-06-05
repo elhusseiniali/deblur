@@ -1,14 +1,14 @@
 import torch
 from tqdm import tqdm
 
-from config import device
 from cnn import SUPPORTED_MODELS
 from utils import plot_sample, plot_losses
 
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, debug=False, debug_step=100):
-        self.device = device
+    def __init__(self, model, optimizer, criterion, config, debug=False, debug_step=100):
+        self.config = config
+        self.device = self.config.device
 
         self.model = model.to(self.device)
         self.optimizer = optimizer
@@ -29,7 +29,7 @@ class Trainer:
             print(f"Starting Epoch {i + 1} of {epochs}.")
             flag = False
             if self.debug:
-                if (i+1) % self.debug_step == 0:
+                if (i == 0 or ((i+1) % self.debug_step == 0)):
                     flag = True
             train_loss = self.train_step(train_loader, debug=flag)
             validation_loss = self.evaluate(val_loader)

@@ -6,8 +6,6 @@ from torchvision.models import inception_v3, Inception_V3_Weights
 
 import torch.nn as nn
 
-from config import device
-
 
 SUPPORTED_MODELS = {
     'resnet50': resnet50(weights=ResNet50_Weights.DEFAULT),
@@ -17,7 +15,10 @@ SUPPORTED_MODELS = {
 }
 
 
-def get_model(model_id, img_size):
+def get_model(config):
+    model_id = config.model_id
+    img_size = config.img_size
+
     if model_id not in SUPPORTED_MODELS.keys():
         raise ValueError('Unsupported model_id.')
     model = SUPPORTED_MODELS[model_id]
@@ -27,5 +28,5 @@ def get_model(model_id, img_size):
         num_features,
         (3 * img_size * img_size)
     )
-    model.to(device)
+    model.to(config.device)
     return model
