@@ -3,9 +3,7 @@ from tqdm import tqdm
 
 from config import device
 from cnn import SUPPORTED_MODELS
-from utils import plot_sample
-
-import matplotlib.pyplot as plt
+from utils import plot_sample, plot_losses
 
 
 class Trainer:
@@ -42,18 +40,7 @@ class Trainer:
                 f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
                 f"Validation loss: {validation_loss:.4f}"
             )
-
-        plt.plot(range(1, epochs + 1), train_losses, label="Train Loss")
-        plt.plot(range(1, epochs + 1), validation_losses, label="Validation Loss")
-        plt.xlabel("Epochs")
-        plt.ylabel("Loss")
-        plt.title("Training and Validation Losses")
-        plt.legend(
-            loc='center left',
-            bbox_to_anchor=(1, 0.5)
-        )
-        plt.xticks(range(1, epochs + 1))
-        plt.show()
+        plot_losses(train_losses, validation_losses)
 
     def train_step(self, train_loader, debug=False):
         self.model.train()

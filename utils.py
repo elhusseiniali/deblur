@@ -8,7 +8,7 @@ mean = np.array([0.485, 0.456, 0.406])
 std = np.array([0.229, 0.224, 0.225])
 
 
-def plot_sample(sample, figsize=(10, 5), normalized=False):
+def plot_sample(sample, figsize=(10, 5), normalized=True):
     plt.figure(figsize=figsize)
 
     num_cols = len(sample)
@@ -46,3 +46,20 @@ def plot_batch(dataloader, batch_index=0, figsize=(10, 5)):
 
     for blur, sharp in zip(batch[0], batch[1]):
         plot_sample((blur, sharp), figsize)
+
+
+def plot_losses(train_losses, validation_losses):
+    epochs = len(train_losses)
+    if len(validation_losses) != epochs:
+        raise ValueError('Number of losses for training and validation does not match.')
+    plt.plot(range(1, epochs + 1), train_losses, label="Train Loss")
+    plt.plot(range(1, epochs + 1), validation_losses, label="Validation Loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Losses")
+    plt.legend(
+        loc='center left',
+        bbox_to_anchor=(1, 0.5)
+    )
+    plt.xticks(range(1, epochs + 1))
+    plt.show()
