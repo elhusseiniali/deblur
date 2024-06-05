@@ -2,6 +2,8 @@ import torch
 from tqdm import tqdm
 from config import device
 
+import matplotlib.pyplot as plt
+
 
 class Trainer:
     def __init__(self, model, optimizer, criterion):
@@ -12,10 +14,7 @@ class Trainer:
         self.criterion = criterion
 
     def train(self, train_loader, val_loader, epochs):
-        train_losses, validation_losses = (
-            [],
-            []
-        )
+        train_losses, validation_losses = ([], [])
 
         for i in range(epochs):
             print(f"Starting Epoch {i + 1} of {epochs}.")
@@ -28,6 +27,18 @@ class Trainer:
                 f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
                 f"Validation loss: {validation_loss:.4f}"
             )
+
+        plt.plot(range(1, epochs + 1), train_losses, label="Train Loss")
+        plt.plot(range(1, epochs + 1), validation_losses, label="Validation Loss")
+        plt.xlabel("Epochs")
+        plt.ylabel("Loss")
+        plt.title("Training and Validation Losses")
+        plt.legend(
+            loc='center left',
+            bbox_to_anchor=(1, 0.5)
+        )
+        plt.xticks(range(1, epochs + 1))
+        plt.show()
 
     def train_step(self, train_loader):
         self.model.train()
@@ -47,7 +58,6 @@ class Trainer:
             # Add loss to total loss
             train_loss += loss.item() * blur.size(0)
         return train_loss
-
 
     @torch.no_grad()
     def evaluate(self, val_loader):
