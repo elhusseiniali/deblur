@@ -1,24 +1,32 @@
 import torch
 from tqdm import tqdm
 from config import device
+from utils import plot_sample
 
 import matplotlib.pyplot as plt
 
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion):
+    def __init__(self, model, optimizer, criterion, debug=False, debug_step=100):
         self.device = device
 
         self.model = model.to(self.device)
         self.optimizer = optimizer
         self.criterion = criterion
 
+        self.debug = debug
+        self.debug_step = debug_step
+
     def train(self, train_loader, val_loader, epochs):
         train_losses, validation_losses = ([], [])
 
         for i in range(epochs):
             print(f"Starting Epoch {i + 1} of {epochs}.")
-            train_loss = self.train_step(train_loader)
+            flag = False
+            if self.debug:
+                if i % self.debug_step == 0:
+                    flag = True
+            train_loss = self.train_step(train_loader, debug=flag)
             validation_loss = self.evaluate(val_loader)
             train_losses.append(train_loss)
             validation_losses.append(validation_loss)
@@ -40,7 +48,7 @@ class Trainer:
         plt.xticks(range(1, epochs + 1))
         plt.show()
 
-    def train_step(self, train_loader):
+    def train_step(self, train_loader, debug=False):
         self.model.train()
         train_loss = 0
         for blur, sharp in tqdm(train_loader, unit="batch", total=len(train_loader)):
@@ -57,6 +65,15 @@ class Trainer:
             self.optimizer.step()
             # Add loss to total loss
             train_loss += loss.item() * blur.size(0)
+            if debug:
+                for idx in range(len(blurry_batch)):
+                    input_image = blurry_batch[idx].clone().detach().cpu()
+                    label = sharp_batch[idx].clone().detach().cpu()
+                    prediction = output_batch[idx].clone().detach().cpu()
+                    plot_sample(
+                        (input_image, label, prediction),
+                        normalized=True
+                    )
         return train_loss
 
     @torch.no_grad()
