@@ -1,6 +1,8 @@
 import torch
 from tqdm import tqdm
+
 from config import device
+from cnn import SUPPORTED_MODELS
 from utils import plot_sample
 
 import matplotlib.pyplot as plt
@@ -17,6 +19,11 @@ class Trainer:
         self.debug = debug
         self.debug_step = debug_step
 
+
+    @staticmethod
+    def supported_models():
+        return list(SUPPORTED_MODELS.keys())
+
     def train(self, train_loader, val_loader, epochs):
         train_losses, validation_losses = ([], [])
 
@@ -24,7 +31,7 @@ class Trainer:
             print(f"Starting Epoch {i + 1} of {epochs}.")
             flag = False
             if self.debug:
-                if i % self.debug_step == 0:
+                if (i+1) % self.debug_step == 0:
                     flag = True
             train_loss = self.train_step(train_loader, debug=flag)
             validation_loss = self.evaluate(val_loader)
