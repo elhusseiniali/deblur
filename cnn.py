@@ -7,7 +7,7 @@ from torchvision.models import inception_v3, Inception_V3_Weights
 import torch.nn as nn
 
 
-SUPPORTED_MODELS = {
+SUPPORTED_CNN = {
     'resnet50': resnet50(weights=ResNet50_Weights.DEFAULT),
     'resnet101': resnet101(weights=ResNet101_Weights.DEFAULT),
     'resnet152': resnet152(weights=ResNet152_Weights.DEFAULT),
@@ -15,13 +15,13 @@ SUPPORTED_MODELS = {
 }
 
 
-def get_model(config):
+def get_cnn(config):
     model_id = config.model_id
     img_size = config.img_size
 
-    if model_id not in SUPPORTED_MODELS.keys():
+    if model_id not in SUPPORTED_CNN.keys():
         raise ValueError('Unsupported model_id.')
-    model = SUPPORTED_MODELS[model_id]
+    model = SUPPORTED_CNN[model_id]
 
     num_features = model.fc.in_features
     model.fc = nn.Linear(
