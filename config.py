@@ -1,4 +1,9 @@
 import torch
+from cnn import SUPPORTED_CNN
+from vit import SUPPORTED_VIT
+
+
+SUPPORTED_MODELS = list(SUPPORTED_CNN.keys()) + list(SUPPORTED_VIT.keys())
 
 
 class Config:
