@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from cnn import SUPPORTED_MODELS
+from config import SUPPORTED_MODELS
 from utils import plot_sample, plot_losses
 
 
@@ -20,7 +20,7 @@ class Trainer:
 
     @staticmethod
     def supported_models():
-        return list(SUPPORTED_MODELS.keys())
+        return list(SUPPORTED_MODELS)
 
     def train(self, train_loader, val_loader, epochs):
         train_losses, validation_losses = ([], [])
@@ -65,7 +65,8 @@ class Trainer:
                     label = sharp_batch[idx].clone().detach().cpu()
                     prediction = output_batch[idx].clone().detach().cpu()
                     plot_sample(
-                        (input_image, label, prediction),
+                        sample=(input_image, label, prediction),
+                        config=self.config,
                         normalized=True
                     )
         return train_loss
