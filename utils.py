@@ -50,7 +50,7 @@ def plot_batch(dataloader, config, batch_index=0, figsize=(10, 5)):
         plot_sample(sample=(blur, sharp), config=config, figsize=figsize)
 
 
-def plot_losses(train_losses, validation_losses):
+def plot_losses(train_losses, validation_losses, model_id):
     epochs = len(train_losses)
     if len(validation_losses) != epochs:
         raise ValueError(
@@ -59,7 +59,7 @@ def plot_losses(train_losses, validation_losses):
     plt.plot(range(1, epochs + 1), validation_losses, label="Validation Loss")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
-    plt.title("Training and Validation Losses")
+    plt.title(f"Training and Validation Losses for {model_id}")
     plt.legend(
         loc='center left',
         bbox_to_anchor=(1, 0.5)
