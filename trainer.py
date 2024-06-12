@@ -6,7 +6,14 @@ from utils import plot_sample, plot_losses
 
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, config, debug=False, debug_step=100):
+    def __init__(
+        self,
+        model,
+        optimizer,
+        criterion,
+        config,
+        debug=False, debug_step=100, debug_image_count=1
+    ):
         self.config = config
         self.device = self.config.device
 
@@ -16,7 +23,7 @@ class Trainer:
 
         self.debug = debug
         self.debug_step = debug_step
-
+        self.debug_image_count = debug_image_count
 
     @staticmethod
     def supported_models():
@@ -29,9 +36,12 @@ class Trainer:
             print(f"Starting Epoch {i + 1} of {epochs}.")
             flag = False
             if self.debug:
-                if (i == 0 or ((i+1) % self.debug_step == 0)):
+                if i == 0 or ((i + 1) % self.debug_step == 0):
                     flag = True
-            train_loss = self.train_step(train_loader, debug=flag)
+            train_loss = self.train_step(
+                train_loader,
+                debug=flag,
+                debug_image_count=self.debug_image_count)
             validation_loss = self.evaluate(val_loader)
             train_losses.append(train_loss)
             validation_losses.append(validation_loss)
@@ -42,7 +52,7 @@ class Trainer:
             )
         plot_losses(train_losses, validation_losses)
 
-    def train_step(self, train_loader, debug=False):
+    def train_step(self, train_loader, debug=False, debug_image_count=1):
         self.model.train()
         train_loss = 0
         for blur, sharp in tqdm(train_loader, unit="batch", total=len(train_loader)):
@@ -60,14 +70,16 @@ class Trainer:
             # Add loss to total loss
             train_loss += loss.item() * blur.size(0)
             if debug:
-                for idx in range(len(blurry_batch)):
+                if debug_image_count > len(blurry_batch):
+                    debug_image_count = 1
+                for idx in range(debug_image_count):
                     input_image = blurry_batch[idx].clone().detach().cpu()
                     label = sharp_batch[idx].clone().detach().cpu()
                     prediction = output_batch[idx].clone().detach().cpu()
                     plot_sample(
                         sample=(input_image, label, prediction),
                         config=self.config,
-                        normalized=True
+                        normalized=True,
                     )
         return train_loss
 
