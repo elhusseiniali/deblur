@@ -8,6 +8,7 @@ from utils import plot_sample, plot_losses
 class Trainer:
     def __init__(
         self,
+        model_id,
         model,
         optimizer,
         criterion,
@@ -16,7 +17,7 @@ class Trainer:
     ):
         self.config = config
         self.device = self.config.device
-
+        self.model_id = model_id
         self.model = model.to(self.device)
         self.optimizer = optimizer
         self.criterion = criterion
@@ -50,7 +51,7 @@ class Trainer:
                 f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
                 f"Validation loss: {validation_loss:.4f}"
             )
-        plot_losses(train_losses, validation_losses)
+        plot_losses(train_losses, validation_losses, self.model_id)
 
     def train_step(self, train_loader, debug=False, debug_image_count=1):
         self.model.train()
