@@ -1,8 +1,10 @@
 import torch
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from config import SUPPORTED_MODELS
 from utils import plot_sample, plot_losses
+
+import sys
 
 
 class Trainer:
@@ -32,9 +34,7 @@ class Trainer:
 
     def train(self, train_loader, val_loader, epochs):
         train_losses, validation_losses = ([], [])
-
-        for i in range(epochs):
-            print(f"Starting Epoch {i + 1} of {epochs}.")
+        for i in tqdm(range(epochs), unit="epoch", total=epochs, file=sys.stdout, desc='Training'):
             flag = False
             if self.debug:
                 if i == 0 or ((i + 1) % self.debug_step == 0):
@@ -46,17 +46,17 @@ class Trainer:
             validation_loss = self.evaluate(val_loader)
             train_losses.append(train_loss)
             validation_losses.append(validation_loss)
-
-            print(
-                f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
-                f"Validation loss: {validation_loss:.4f}"
-            )
+            if i == 0 or ((i + 1) % self.debug_step == 0):
+                tqdm.write(
+                    f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
+                    f"Validation loss: {validation_loss:.4f}"
+                )
         plot_losses(train_losses, validation_losses, self.model_id)
 
     def train_step(self, train_loader, debug=False, debug_image_count=1):
         self.model.train()
         train_loss = 0
-        for blur, sharp in tqdm(train_loader, unit="batch", total=len(train_loader)):
+        for blur, sharp in train_loader:
             blurry_batch, sharp_batch = blur.to(self.device), sharp.to(self.device)
             img_shape = blurry_batch.shape[1:]
             # Zero the gradients
@@ -88,7 +88,8 @@ class Trainer:
     def evaluate(self, val_loader):
         self.model.eval()
         val_loss = 0
-        for blur, sharp in tqdm(val_loader, unit="batch", total=len(val_loader)):
+        # for blur, sharp in tqdm(val_loader, unit="batch", total=len(val_loader)):
+        for blur, sharp in val_loader:
             blurry_batch, sharp_batch = blur.to(self.device), sharp.to(self.device)
             img_shape = blurry_batch.shape[1:]
 
