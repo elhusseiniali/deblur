@@ -110,7 +110,7 @@ def get_loader(data_path, config, batch_size, image_limit=False, augment=True):
         data_path=data_path,
         config=config,
         image_limit=image_limit,
-        augment=True
+        augment=augment
     )
     loader = DataLoader(dataset, batch_size, shuffle=True)
     return loader
