@@ -1,8 +1,10 @@
 import torch
-from tqdm.auto import tqdm
+from torch.cuda.amp import autocast, GradScaler
+
+from tqdm import tqdm
 
 from config import SUPPORTED_MODELS
-from utils import plot_sample, plot_losses
+from utils import plot_sample, plot_losses, save_model
 
 import sys
 
@@ -15,6 +17,7 @@ class Trainer:
         optimizer,
         criterion,
         config,
+        experiment_name='',
         debug=False, debug_step=100, debug_image_count=1
     ):
         self.config = config
@@ -23,6 +26,8 @@ class Trainer:
         self.model = model.to(self.device)
         self.optimizer = optimizer
         self.criterion = criterion
+
+        self.experiment_name = experiment_name
 
         self.debug = debug
         self.debug_step = debug_step
@@ -34,13 +39,21 @@ class Trainer:
 
     def train(self, train_loader, val_loader, epochs):
         train_losses, validation_losses = ([], [])
-        for i in tqdm(range(epochs), unit="epoch", total=epochs, file=sys.stdout, desc='Training'):
+        scaler = GradScaler()
+        for i in tqdm(
+            range(epochs),
+            unit="epoch",
+            total=epochs,
+            file=sys.stdout,
+            desc='Training Epochs'
+        ):
             flag = False
             if self.debug:
                 if i == 0 or ((i + 1) % self.debug_step == 0):
                     flag = True
             train_loss = self.train_step(
                 train_loader,
+                scaler=scaler,
                 debug=flag,
                 debug_image_count=self.debug_image_count)
             validation_loss = self.evaluate(val_loader)
@@ -51,23 +64,42 @@ class Trainer:
                     f"Epoch: {i+1}, Train loss: {train_loss:.4f}, "
                     f"Validation loss: {validation_loss:.4f}"
                 )
-        plot_losses(train_losses, validation_losses, self.model_id)
+                save_model(
+                    model=self.model,
+                    model_id=self.model_id,
+                    experiment_name=self.experiment_name,
+                    epoch=i
+                )
+        plot_losses(
+            train_losses,
+            validation_losses,
+            self.model_id,
+            experiment_name=self.experiment_name
+        )
 
-    def train_step(self, train_loader, debug=False, debug_image_count=1):
+    def train_step(self, train_loader, scaler, debug=False, debug_image_count=1):
         self.model.train()
         train_loss = 0
-        for blur, sharp in train_loader:
-            blurry_batch, sharp_batch = blur.to(self.device), sharp.to(self.device)
+        for blur, sharp in tqdm(
+            train_loader,
+            unit='batch',
+            total=len(train_loader),
+            file=sys.stdout,
+            desc='Training Batches'):
+        # for blur, sharp in train_loader:
+            blurry_batch, sharp_batch = blur.cuda(non_blocking=True), sharp.cuda(non_blocking=True)
             img_shape = blurry_batch.shape[1:]
             # Zero the gradients
             self.optimizer.zero_grad()
-            output_batch = self.model(blurry_batch).view(-1, *img_shape)
-            # Compute loss for current batch
-            loss = self.criterion(output_batch, sharp_batch)
+            with autocast():
+                output_batch = self.model(blurry_batch).view(-1, *img_shape)
+                # Compute loss for current batch
+                loss = self.criterion(output_batch, sharp_batch)
             # Backpropagation
-            loss.backward()
+            scaler.scale(loss).backward()
             # Update the model's parameters
-            self.optimizer.step()
+            scaler.step(self.optimizer)
+            scaler.update()
             # Add loss to total loss
             train_loss += loss.item() * blur.size(0)
             if debug:
