@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import torch
+from pathlib import Path
 
 
 def plot_sample(sample, config, figsize=(10, 5), normalized=True):
@@ -50,7 +51,7 @@ def plot_batch(dataloader, config, batch_index=0, figsize=(10, 5)):
         plot_sample(sample=(blur, sharp), config=config, figsize=figsize)
 
 
-def plot_losses(train_losses, validation_losses, model_id):
+def plot_losses(train_losses, validation_losses, model_id, experiment_name=''):
     epochs = len(train_losses)
     if len(validation_losses) != epochs:
         raise ValueError(
@@ -65,4 +66,23 @@ def plot_losses(train_losses, validation_losses, model_id):
         bbox_to_anchor=(1, 0.5)
     )
     plt.xticks(range(1, epochs + 1))
-    plt.show()
+    if experiment_name:
+        figure_dir = Path('./figures')
+        figure_dir.mkdir(parents=True, exist_ok=True)
+        output_path = Path(
+            figure_dir / f'{experiment_name}.png'
+        )
+        plt.savefig(output_path, bbox_inches='tight')
+    else:
+        plt.show()
+
+
+def save_model(model, model_id, experiment_name, epoch):
+    checkpoint_dir = Path('./checkpoints')
+    model_dir = Path(checkpoint_dir) / f'{model_id}'
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = (
+        Path(model_dir) / f'{experiment_name}_epoch-{epoch}_model_weights.pth'
+    )
+    torch.save(model.state_dict(), output_path)
