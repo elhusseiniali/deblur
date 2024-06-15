@@ -105,12 +105,18 @@ class BlurAndSharp(Dataset):
         return (combined_images[0], combined_images[1])
 
 
-def get_loader(data_path, config, batch_size, image_limit=False, augment=True):
+def get_loader(data_path, config, batch_size, image_limit=False, augment=True, workers=8):
     dataset = BlurAndSharp(
         data_path=data_path,
         config=config,
         image_limit=image_limit,
         augment=augment
     )
-    loader = DataLoader(dataset, batch_size, shuffle=True)
+    loader = DataLoader(
+        dataset,
+        batch_size,
+        shuffle=True,
+        num_workers=workers,
+        pin_memory=True
+    )
     return loader
