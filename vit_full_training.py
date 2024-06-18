@@ -19,8 +19,8 @@ val_path = celeb_path / 'validation'
 batch_size = 1024
 image_limit = None
 
-learning_rates = [1e-6, 1e-4, 1e-3, 1e-2]
-num_epochs = 60
+learning_rates = [1e-6, 1e-4, 1e-2]
+num_epochs = 50
 
 debug = False
 debug_step = 15
