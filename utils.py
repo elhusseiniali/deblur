@@ -52,6 +52,8 @@ def plot_batch(dataloader, config, batch_index=0, figsize=(10, 5)):
 
 
 def plot_losses(train_losses, validation_losses, model_id, experiment_name=''):
+    plt.figure()
+    plt.clf()
     epochs = len(train_losses)
     if len(validation_losses) != epochs:
         raise ValueError(
