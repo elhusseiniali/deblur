@@ -34,8 +34,17 @@ print(f'Supported vision transformers: {list(SUPPORTED_VIT.keys())}')
 print(f'Supported losses: {list(SUPPORTED_LOSS.keys())}')
 print(f'Supported optimizers: {list(SUPPORTED_OPTIMIZERS.keys())}')
 
-for model_id in SUPPORTED_VIT.keys():
+models = ['vit_l32', 'vit_h14']
+for model_id in models:
+    assert model_id in SUPPORTED_VIT.keys()
+
+for model_id in models:
     print(f'Using model: {model_id}')
+    if model_id == 'vit_l32':
+        device = 'cuda:0'
+    elif model_id == 'vit_h14':
+        device = 'cuda:1'
+
     config = Config(
         model_id=model_id,
         img_size=224,
@@ -43,7 +52,8 @@ for model_id in SUPPORTED_VIT.keys():
         test_path=test_path,
         val_path=val_path,
         mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
+        std=[0.229, 0.224, 0.225],
+        device=device
     )
 
     train_loader = get_loader(
@@ -63,7 +73,6 @@ for model_id in SUPPORTED_VIT.keys():
         workers=workers
     )
 
-
     model = get_vit(config=config)
     for criterion_id in SUPPORTED_LOSS:
         criterion = get_loss(criterion_id)
@@ -74,10 +83,13 @@ for model_id in SUPPORTED_VIT.keys():
                     model=model,
                     learning_rate=learning_rate
                 )
-                experiment_name = f'{model_id}_lr-{learning_rate}_loss-{criterion_id}_optim-{optimizer_id}'
+                experiment_name = (
+                    f'{model_id}_lr-{learning_rate}_'
+                    f'loss-{criterion_id}_optim-{optimizer_id}')
                 print(f'Setting learning rate to: {learning_rate}')
                 print('##############################')
-                print(f'Using {optimizer_id} with {criterion_id} on {model_id}')
+                print(
+                    f'Using {optimizer_id} with {criterion_id} on {model_id}')
                 print('##############################')
                 trainer = Trainer(
                     model_id=model_id,
