@@ -1,14 +1,14 @@
-from torchvision.models import vit_b_32 , ViT_B_32_Weights
-from torchvision.models import vit_l_32 , ViT_L_32_Weights
-from torchvision.models import vit_h_14 , ViT_H_14_Weights
+from torchvision.models import vit_b_32, ViT_B_32_Weights
+from torchvision.models import vit_l_32, ViT_L_32_Weights
+from torchvision.models import vit_h_14, ViT_H_14_Weights
 
 import torch.nn as nn
 
 
 SUPPORTED_VIT = {
-    'vit_b32' : vit_b_32(weights=ViT_B_32_Weights.DEFAULT),
-    'vit_l32' : vit_l_32(weights= ViT_L_32_Weights.DEFAULT),
-    'vit_h14' : vit_h_14(weights=ViT_H_14_Weights.DEFAULT)
+    'vit_b32': vit_b_32(weights=ViT_B_32_Weights.DEFAULT),
+    'vit_l32': vit_l_32(weights=ViT_L_32_Weights.DEFAULT),
+    'vit_h14': vit_h_14(weights=ViT_H_14_Weights.DEFAULT)
 }
 
 
