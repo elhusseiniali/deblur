@@ -13,11 +13,20 @@ class Config:
             img_size,
             train_path, test_path, val_path,
             mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        ):
+            std=[0.229, 0.224, 0.225],
+            device=''
+    ):
         self.model_id = model_id
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
+        self.device = ''
+        if device:
+            try:
+                self.device = torch.device(device)
+            except Exception as e:
+                print(f'Could not set device to {device}. Got {e}.')
+        if not self.device:
+            self.device = torch.device(
+                "cuda" if torch.cuda.is_available() else "cpu")
+
         self.img_size = img_size
 
         self.train_path = train_path
