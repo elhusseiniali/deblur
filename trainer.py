@@ -77,7 +77,13 @@ class Trainer:
             experiment_name=self.experiment_name
         )
 
-    def train_step(self, train_loader, scaler, debug=False, debug_image_count=1):
+    def train_step(
+        self,
+        train_loader,
+        scaler,
+        debug=False,
+        debug_image_count=1
+    ):
         self.model.train()
         train_loss = 0
         for blur, sharp in tqdm(
@@ -85,9 +91,13 @@ class Trainer:
             unit='batch',
             total=len(train_loader),
             file=sys.stdout,
-            desc='Training Batches'):
-        # for blur, sharp in train_loader:
-            blurry_batch, sharp_batch = blur.cuda(non_blocking=True), sharp.cuda(non_blocking=True)
+            desc='Training Batches'
+        ):
+            # for blur, sharp in train_loader:
+            blurry_batch, sharp_batch = (
+                blur.to(self.device),
+                sharp.to(self.device)
+            )
             img_shape = blurry_batch.shape[1:]
             # Zero the gradients
             self.optimizer.zero_grad()
@@ -120,9 +130,11 @@ class Trainer:
     def evaluate(self, val_loader):
         self.model.eval()
         val_loss = 0
-        # for blur, sharp in tqdm(val_loader, unit="batch", total=len(val_loader)):
         for blur, sharp in val_loader:
-            blurry_batch, sharp_batch = blur.to(self.device), sharp.to(self.device)
+            blurry_batch, sharp_batch = (
+                blur.to(self.device),
+                sharp.to(self.device)
+            )
             img_shape = blurry_batch.shape[1:]
 
             output_batch = self.model(blurry_batch).view(-1, *img_shape)
