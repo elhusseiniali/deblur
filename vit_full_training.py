@@ -16,7 +16,7 @@ train_path = celeb_path / 'train'
 test_path = celeb_path / 'test'
 val_path = celeb_path / 'validation'
 
-batch_size = 1024
+batch_size = 256
 image_limit = None
 
 learning_rates = [1e-6, 1e-4, 1e-2]
@@ -34,7 +34,10 @@ print(f'Supported vision transformers: {list(SUPPORTED_VIT.keys())}')
 print(f'Supported losses: {list(SUPPORTED_LOSS.keys())}')
 print(f'Supported optimizers: {list(SUPPORTED_OPTIMIZERS.keys())}')
 
-models = ['vit_l32', 'vit_h14']
+models = [
+    'vit_l32',
+    # 'vit_h14'
+]
 for model_id in models:
     assert model_id in SUPPORTED_VIT.keys()
 
