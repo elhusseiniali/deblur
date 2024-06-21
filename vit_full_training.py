@@ -19,7 +19,11 @@ val_path = celeb_path / 'validation'
 batch_size = 256
 image_limit = None
 
-learning_rates = [1e-6, 1e-4, 1e-2]
+learning_rates = [
+    1e-6,
+    1e-4,
+    1e-2
+]
 num_epochs = 50
 
 debug = False
@@ -35,18 +39,14 @@ print(f'Supported losses: {list(SUPPORTED_LOSS.keys())}')
 print(f'Supported optimizers: {list(SUPPORTED_OPTIMIZERS.keys())}')
 
 models = [
-    'vit_l32',
-    # 'vit_h14'
+    'vit_l32'
 ]
 for model_id in models:
     assert model_id in SUPPORTED_VIT.keys()
 
 for model_id in models:
     print(f'Using model: {model_id}')
-    if model_id == 'vit_l32':
-        device = 'cuda:0'
-    elif model_id == 'vit_h14':
-        device = 'cuda:1'
+    device = 'cuda:1'
 
     config = Config(
         model_id=model_id,
