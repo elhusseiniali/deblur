@@ -21,8 +21,8 @@ image_limit = None
 
 learning_rates = [
     1e-6,
-    1e-4,
-    1e-2
+    #    1e-4,
+    #    1e-2
 ]
 num_epochs = 50
 
@@ -46,7 +46,7 @@ for model_id in models:
 
 for model_id in models:
     print(f'Using model: {model_id}')
-    device = 'cuda:1'
+    device = 'cuda:0'
 
     config = Config(
         model_id=model_id,
@@ -77,9 +77,9 @@ for model_id in models:
     )
 
     model = get_vit(config=config)
-    for criterion_id in SUPPORTED_LOSS:
+    for criterion_id in ['l1']:
         criterion = get_loss(criterion_id)
-        for optimizer_id in SUPPORTED_OPTIMIZERS:
+        for optimizer_id in ['sgd']:
             for learning_rate in learning_rates:
                 optimizer = get_optimizer(
                     optimizer_id=optimizer_id,
