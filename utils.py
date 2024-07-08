@@ -49,6 +49,7 @@ def plot_batch(dataloader, config, batch_index=0, figsize=(10, 5)):
 
     for blur, sharp in zip(batch[0], batch[1]):
         plot_sample(sample=(blur, sharp), config=config, figsize=figsize)
+    return batch[0], batch[1]
 
 
 def plot_losses(train_losses, validation_losses, model_id, experiment_name=''):
